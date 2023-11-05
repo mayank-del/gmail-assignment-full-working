@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Messages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .email-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .email-item {
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .email-subject {
+            font-weight: bold;
+        }
+        .email-from {
+            color: #666;
+        }
+        .email-date {
+            color: #999;
+        }
+        button{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    
+    <h1>Email Messages</h1>
+    <ul class="email-list">
+        <% cleanedData.forEach((message, index) => { %>
+        <li class="email-item" >
+            
+            <button class="send-email-button" data-email="<%= message.from %>" id="button-<%= message.from %>">Reply</button>
+            <p style="display: none;" id="tags-hidden-<%= message.from %>"><%= message.tags %></p>
+            <div class="email-subject"><%= message.sub %></div>
+            <div class="email-from">From: <%= message.from %></div>
+            <div class="email-from">To: <%= message.to %></div>
+            <div class="email-date">Date: <%= message.date %></div>
+            <div class="email-content">
+                <%= message.msgData %>
+            </div>
+        </li>
+        <% }); %>
+    </ul>
+    <!-- Add this JavaScript code to your EJS file -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('.send-email-button');
+        
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                const email = this.getAttribute('data-email');
+                sendEmail(email);
+                disableButton(email);
+                toggleTagsVisibility(email);
+            });
+        });
+
+        function sendEmail(email) {
+            fetch(`/send-email/${email}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                /* body: JSON.stringify({ //no body require for this operation
+                    // You can include any data you need to send in the request body
+                    // For example, you can include the email content, subject, etc.
+                }) */
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Mail Sent Successfully!")
+                } else {
+                    console.error('Error sending email.');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending email:', error);
+            });
+        }
+
+        function toggleTagsVisibility(email) {
+            const pElement = document.getElementById(`tags-hidden-${email}`);
+            if (pElement) {
+                pElement.style.display = 'block'; // Show the <p> element
+            }
+        }
+
+        function disableButton(email) {
+            const button = document.getElementById(`button-${email}`);
+            if (button) {
+                button.disabled = true;
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
